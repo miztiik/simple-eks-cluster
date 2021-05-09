@@ -1,0 +1,15 @@
+replication is not update
+visibility is missing
+monitoring is not straight forward 
+- only to query DBs
+- transaction logs
+- temp disk space
+
+End customer complaints - because of synchronous nature of application,
+
+Failure over automation on failover
+synchronous replication on read replica - Console shows no replication lag - actually there is a replication lag around 10 minutes. Maintenance plan was running on the main node.
+customer complaints
+
+Multi-AZ 
+

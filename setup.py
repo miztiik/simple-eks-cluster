@@ -9,14 +9,14 @@ setuptools.setup(
     name="simple_eks_cluster",
     version="0.0.1",
 
-    description="An empty CDK Python app",
+    description="simple-eks-cluster",
     long_description=long_description,
     long_description_content_type="text/markdown",
 
     author="author",
 
-    package_dir={"": "simple_eks_cluster"},
-    packages=setuptools.find_packages(where="simple_eks_cluster"),
+    package_dir={"": "stacks"},
+    packages=setuptools.find_packages(where="stacks"),
 
     install_requires=[
         "aws-cdk.core==1.100.0",
