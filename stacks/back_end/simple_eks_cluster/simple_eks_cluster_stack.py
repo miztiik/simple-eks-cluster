@@ -18,9 +18,10 @@ class SimpleEksClusterStack(cdk.Stack):
 
         # Create EKS Cluster Role
         # https://docs.aws.amazon.com/eks/latest/userguide/getting-started-console.html
+
         self._eks_cluster_svc_role = _iam.Role(
             self,
-            "ClusterSvcRole",
+            "c_SvcRole",
             assumed_by=_iam.ServicePrincipal(
                 "eks.amazonaws.com"),
             managed_policies=[
@@ -36,9 +37,10 @@ class SimpleEksClusterStack(cdk.Stack):
             ]
         )
 
+
         self._eks_node_role = _iam.Role(
             self,
-            "NodeRole",
+            "c_NodeRole",
             assumed_by=_iam.ServicePrincipal(
                 "ec2.amazonaws.com"),
             managed_policies=[
@@ -55,6 +57,25 @@ class SimpleEksClusterStack(cdk.Stack):
                     "AmazonSSMManagedInstanceCore"
                 )
             ]
+        )
+
+        c_admin_role = _iam.Role(
+            self,
+            "c_AdminRole",
+            assumed_by=_iam.CompositePrincipal(
+                _iam.AccountRootPrincipal(),
+                _iam.ServicePrincipal(
+                    "ec2.amazonaws.com")
+            )
+        )
+        c_admin_role.add_to_policy(
+            _iam.PolicyStatement(
+                effect=_iam.Effect.ALLOW,
+                actions=[
+                    "eks:DescribeCluster"
+                ],
+                resources=["*"]
+            )
         )
 
         # Create Security Group for EKS Cluster SG
@@ -74,7 +95,14 @@ class SimpleEksClusterStack(cdk.Stack):
             description="Allow incoming within SG"
         )
 
-        clust_name = "2_cdk_c_t"
+        clust_name = "1_cdk_c"
+
+        eks_c_admin = _iam.Role(
+            self,
+            f"admin_{clust_name}",
+            assumed_by=_iam.AccountRootPrincipal(),
+            role_name="c_admin"
+        )
 
         eks_cluster_1 = _eks.Cluster(
             self,
@@ -89,7 +117,8 @@ class SimpleEksClusterStack(cdk.Stack):
                     subnet_type=_ec2.SubnetType.PRIVATE)
             ],
             default_capacity=0,
-            masters_role=self._eks_cluster_svc_role,
+            masters_role=c_admin_role,
+            role=self._eks_cluster_svc_role,
             security_group=self.eks_cluster_sg,
             endpoint_access=_eks.EndpointAccess.PUBLIC
             # endpoint_access=_eks.EndpointAccess.PUBLIC_AND_PRIVATE
@@ -115,9 +144,19 @@ class SimpleEksClusterStack(cdk.Stack):
             node_role=self._eks_node_role
         )
 
-
-        # _eks.AwsAuth(self, "aws-auth",cluster=_cluster).add_masters_role(role=_masters_role)
-
+        # This code block will provision worker nodes with launch configuration
+        """
+        fargate_n_g_3 = eks_cluster_1.add_fargate_profile(
+            "FargateEnabled",
+            fargate_profile_name="miztiik_n_g_fargate",
+            selectors=[
+                _eks.Selector(
+                    namespace="miztiik_ns",
+                    labels={"fargate": "enabled"}
+                )
+            ]
+        )
+        """
 
         """
         # This code block will provision worker nodes with launch configuration
@@ -137,6 +176,15 @@ class SimpleEksClusterStack(cdk.Stack):
                                                     )
         """
 
+        """
+        # Install Metrics Server
+        eks_cluster_1.add_helm_chart(
+            f"metrics_{clust_name}",
+                chart = 'metrics-server',
+                repository = "https://charts.helm.sh/stable",
+                namespace = "toolstools
+            )
+        """
 
         ###########################################
         ################# OUTPUTS #################
@@ -147,14 +195,14 @@ class SimpleEksClusterStack(cdk.Stack):
             value=f"{GlobalArgs.SOURCE_INFO}",
             description="To know more about this automation stack, check out our github page."
         )
-
+        """
         output_1 = cdk.CfnOutput(
             self,
             "eksClusterRole",
             value=f"{self._eks_cluster_svc_role.role_name}",
             description="EKS Cluster Service Role"
         )
-        """
+
         output_2 = cdk.CfnOutput(
             self,
             "OIDSEndpointUrl",

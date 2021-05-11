@@ -16,7 +16,7 @@ In this demo, let us launch a EKS[1] cluster in a custom VPC using AWS CDK. The 
     - Launch template Two `t3.medium` instances running Amazon Linux 2
     - Auto-scaling Group with `2` desired instances.
 
-![Miztiik Automation: Event Driven Architecture with Kafka](images/miztiik_automation_event_simple_eks_cluster_00.png)
+![Miztiik Automation: Simple EKS Cluster Architecture](images/miztiik_automation_event_simple_eks_cluster_00.png)
 
 1.  ## 🧰 Prerequisites
 
